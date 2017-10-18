@@ -16,5 +16,4 @@ type QuickbooksTransaction struct {
 	Qty 				string
 	UM 					string
 	Class 				string
-
 }

@@ -46,7 +46,7 @@ func (qbs *QuickbooksSheet) getCustomerIndexes() error {
 		}
 	}
 
-	// TODO: Impelement error
+	// TODO: Implement error
 
 	return nil
 }
@@ -82,6 +82,8 @@ func (qbs *QuickbooksSheet) Parse() error {
 
 	fmt.Println()
 	fmt.Println(qbs.QuickbooksTransactions)
+
+	// TODO: Impelement error
 
 	return nil
 }
