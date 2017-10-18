@@ -1,8 +1,9 @@
 package models
 
-import()
+import ()
 
 type QuickbooksTransaction struct {
+	Customer 			string
 	Date 				string
 	Num 				string
 	ShipToAddress1 		string
