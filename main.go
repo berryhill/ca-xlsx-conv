@@ -5,6 +5,7 @@ import (
 )
 
 func main() {
+
 	/*
 	PHASE_1
  	*/
@@ -20,11 +21,15 @@ func main() {
 		// Where to put things
 	// TODO: Daemonize
 		// Will scan file periodically to see if change occurred
+		// Docker?
+	// TODO: Connect to FTP of file upload
+	// TODO: Integrate with .xlsx export CRON
 
 	/*
 	PHASE_3
  	*/
 	// TODO: Slack/Healthcheck
+	// TODO: Up on the cloud
 
 	quickbooks_converter := converters.NewQuickbooksSheet()
 	quickbooks_converter.Parse()

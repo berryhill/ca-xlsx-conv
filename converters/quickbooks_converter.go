@@ -16,6 +16,7 @@ type QuickbooksSheet struct {
 }
 
 func NewQuickbooksSheet() *QuickbooksSheet {
+
 	qbs := new(QuickbooksSheet)
 	qbs.File = getQuickbooksFile()
 	qbs.getCustomerIndexes()
@@ -51,39 +52,78 @@ func (qbs *QuickbooksSheet) getCustomerIndexes() error {
 	return nil
 }
 
+func remove(
+	s []*models.QuickbooksTransaction, i int,
+	) []*models.QuickbooksTransaction {
+
+	s[len(s)-1], s[i] = s[i], s[len(s)-1]
+	return s[:len(s)-1]
+}
+
 func (qbs *QuickbooksSheet) Parse() error {
 
 	sheet := qbs.File.Sheets[0]
+	var transactions []*models.QuickbooksTransaction
 
 	for _, customer_i := range qbs.CustomerIndex {
 
-		transaction := new(models.QuickbooksTransaction)
-		transaction.Customer = sheet.Rows[customer_i].Cells[1].Value
+		index := 1
+		for {
+			transaction := new(models.QuickbooksTransaction)
+			transaction.Customer = sheet.Rows[customer_i].Cells[1].Value
 
-		transaction.Date = sheet.Rows[customer_i + 1].Cells[4].Value
-		transaction.Num = sheet.Rows[customer_i + 1].Cells[6].Value
-		transaction.ShipToAddress1 = sheet.Rows[customer_i + 1].Cells[8].Value
-		transaction.ShipToAddress2 = sheet.Rows[customer_i + 1].Cells[10].Value
-		transaction.ShipToCity = sheet.Rows[customer_i + 1].Cells[12].Value
-		transaction.ShipToState = sheet.Rows[customer_i + 1].Cells[14].Value
-		transaction.ShipZip = sheet.Rows[customer_i + 1].Cells[16].Value
-		transaction.PO = sheet.Rows[customer_i + 1].Cells[18].Value
-		transaction.Item = sheet.Rows[customer_i + 1].Cells[20].Value
-		transaction.Qty = sheet.Rows[customer_i + 1].Cells[22].Value
-		transaction.UM = sheet.Rows[customer_i + 1].Cells[24].Value
-		transaction.Class = sheet.Rows[customer_i + 1].Cells[26].Value
+			cell_array := strings.Split(
+				sheet.Rows[customer_i + index].Cells[1].Value, " ")
+			if cell_array[0] == "Total" {
+				break
+			}
 
-		fmt.Println()
-		fmt.Println(transaction)
+			transaction.Date = sheet.Rows[customer_i + index].Cells[4].Value
+			transaction.Num = sheet.Rows[customer_i + index].Cells[6].Value
+			transaction.ShipToAddress1 =
+				sheet.Rows[customer_i + index].Cells[8].Value
+			transaction.ShipToAddress2 =
+				sheet.Rows[customer_i + index].Cells[10].Value
+			transaction.ShipToCity =
+				sheet.Rows[customer_i + index].Cells[12].Value
+			transaction.ShipToState =
+				sheet.Rows[customer_i + index].Cells[14].Value
+			transaction.ShipZip =
+				sheet.Rows[customer_i + index].Cells[16].Value
+			transaction.PO = sheet.Rows[customer_i + index].Cells[18].Value
+			transaction.Item = sheet.Rows[customer_i + index].Cells[20].Value
+			transaction.Qty = sheet.Rows[customer_i + index].Cells[22].Value
+			transaction.UM = sheet.Rows[customer_i + index].Cells[24].Value
+			transaction.Class = sheet.Rows[customer_i + index].Cells[26].Value
 
-		qbs.QuickbooksTransactions = append(
-			qbs.QuickbooksTransactions, transaction)
+			if transaction.Item == "Freight Charges (Freight Charge)" ||
+				transaction.Item == "Bill of Lading Charge (Bill of Lading)" ||
+				transaction.Item == "Loading Charges" ||
+				transaction.Item == "Bulk (Mixing & Packaging of)" ||
+				transaction.Item == "CA Sales Tax (Sales Tax)" ||
+				transaction.Item == "Credit Card Charge - MC" ||
+				transaction.Item == "" {
+				// do not append
+			} else if (transaction.ShipToAddress2 == "") {
+				// do not append
+			} else if (transaction.UM == "") {
+				// do not append
+			} else {
+				transactions = append(transactions, transaction)
+			}
+
+			index++
+		}
 	}
 
-	fmt.Println()
-	fmt.Println(qbs.QuickbooksTransactions)
+	fmt.Println(len(transactions))
+	for _, trans := range(transactions) {
+		fmt.Println(trans)
+	}
 
-	// TODO: Impelement error
+	qbs.QuickbooksTransactions = transactions
+
+	// TODO: Implement error
 
 	return nil
 }
