@@ -31,6 +31,8 @@ func main() {
 	// TODO: Slack/Healthcheck
 	// TODO: Up on the cloud
 
-	quickbooks_converter := converters.NewQuickbooksSheet()
-	quickbooks_converter.Parse()
+	qc := converters.NewQuickbooksSheet()
+	qc.Parse()
+	b := converters.NewBanyan()
+	b.Parse(qc.QuickbooksTransactions)
 }

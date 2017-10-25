@@ -1,7 +1,6 @@
 package converters
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/berryhill/ca-xlsx-conv/models"
@@ -50,14 +49,6 @@ func (qbs *QuickbooksSheet) getCustomerIndexes() error {
 	// TODO: Implement error
 
 	return nil
-}
-
-func remove(
-	s []*models.QuickbooksTransaction, i int,
-	) []*models.QuickbooksTransaction {
-
-	s[len(s)-1], s[i] = s[i], s[len(s)-1]
-	return s[:len(s)-1]
 }
 
 func (qbs *QuickbooksSheet) Parse() error {
@@ -114,11 +105,6 @@ func (qbs *QuickbooksSheet) Parse() error {
 
 			index++
 		}
-	}
-
-	fmt.Println(len(transactions))
-	for _, trans := range(transactions) {
-		fmt.Println(trans)
 	}
 
 	qbs.QuickbooksTransactions = transactions
