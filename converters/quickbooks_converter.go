@@ -14,19 +14,18 @@ type QuickbooksSheet struct {
 	QuickbooksTransactions 	[]*models.QuickbooksTransaction
 }
 
-func NewQuickbooksSheet() *QuickbooksSheet {
+func NewQuickbooksSheet(file_name string) *QuickbooksSheet {
 
 	qbs := new(QuickbooksSheet)
-	qbs.File = getQuickbooksFile()
+	qbs.File = getQuickbooksFile(file_name)
 	qbs.getCustomerIndexes()
 
 	return qbs
 }
 
-func getQuickbooksFile() *xlsx.File {
+func getQuickbooksFile(file_name string) *xlsx.File {
 
-	excelFileName := "qb.xlsx"
-	xlsx_file, err := xlsx.OpenFile(excelFileName)
+	xlsx_file, err := xlsx.OpenFile(file_name)
 	if err != nil {
 		panic(err)
 	}

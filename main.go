@@ -1,6 +1,10 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+	"os"
+
 	"github.com/berryhill/ca-xlsx-conv/converters"
 )
 
@@ -11,7 +15,6 @@ func main() {
  	*/
 	// TODO: Logs
 	// TODO: Tests
-	// TODO: Converters
 	// TODO: Cross Compatibility -> Windows
 
 	/*
@@ -31,8 +34,34 @@ func main() {
 	// TODO: Slack/Healthcheck
 	// TODO: Up on the cloud
 
-	qc := converters.NewQuickbooksSheet()
+	qbEnvFile := flag.String("file", "", "Text to parse.")
+	qbEnvFileName := flag.String(
+		"fileName", "", "Text to parse.")
+	qbEnvFileLocation := flag.String(
+		"fileLocation", "", "Text to parse.")
+
+	flag.Parse()
+	if *qbEnvFile == "" {
+		fmt.Printf(
+			"Must provide file, for example: -file=qb.xlsx")
+		fmt.Println()
+		os.Exit(1)
+	} else if *qbEnvFileName == "" {
+		fmt.Printf(
+			"Must provide a file name for exported .xclx, for " +
+				"example: -fileName=bp.xlsx")
+		fmt.Println()
+		os.Exit(1)
+	} else if *qbEnvFileLocation == "" {
+		fmt.Printf(
+			"Must provide a file location for exported .xclx, for " +
+				"example: -fileLocation=$HOME/Desktop/")
+		fmt.Println()
+		os.Exit(1)
+	}
+
+	qc := converters.NewQuickbooksSheet(*qbEnvFile)
 	qc.Parse()
-	b := converters.NewBanyan()
+	b := converters.NewBanyan(*qbEnvFileName, *qbEnvFileLocation)
 	b.Parse(qc.QuickbooksTransactions)
 }

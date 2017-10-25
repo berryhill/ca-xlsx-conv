@@ -6,12 +6,17 @@ import (
 )
 
 type Banyan struct {
+	FileName 		string
+	FileLocation	string
 	FirstRow		[]string
 	SecondRow		[]string
 }
 
-func NewBanyan() *Banyan {
+func NewBanyan(file_name string, file_location string) *Banyan {
+
 	b := new(Banyan)
+	b.FileName = file_name
+	b.FileLocation = file_location
 
 	b.FirstRow = append(b.FirstRow, "")
 	b.FirstRow = append(b.FirstRow, "Load #")
@@ -55,6 +60,7 @@ func NewBanyan() *Banyan {
 }
 
 func (b *Banyan) Parse(transactions []*models.QuickbooksTransaction) error {
+
 	file := xlsx.NewFile()
 	sheet, err := file.AddSheet("Sheet1")
 	if err != nil {
@@ -121,7 +127,7 @@ func (b *Banyan) Parse(transactions []*models.QuickbooksTransaction) error {
 		cell.Value = transactions[i].Class
 	}
 
-	err = file.Save("Banyan.xlsx")
+	err = file.Save(b.FileLocation + b.FileName)
 	if err != nil {
 		return err
 	}
