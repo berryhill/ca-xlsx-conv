@@ -1,6 +1,7 @@
 package converters
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/berryhill/ca-xlsx-conv/models"
@@ -82,9 +83,13 @@ func (qbs *QuickbooksSheet) Parse() error {
 				sheet.Rows[customer_i + index].Cells[16].Value
 			transaction.PO = sheet.Rows[customer_i + index].Cells[18].Value
 			transaction.Item = sheet.Rows[customer_i + index].Cells[20].Value
-			transaction.Qty = sheet.Rows[customer_i + index].Cells[22].Value
 			transaction.UM = sheet.Rows[customer_i + index].Cells[24].Value
 			transaction.Class = sheet.Rows[customer_i + index].Cells[26].Value
+
+			q := sheet.Rows[customer_i + index].Cells[22].Value
+			qty, _ := strconv.Atoi(q)
+			qty = qty * -1
+			transaction.Qty = strconv.Itoa(qty)
 
 			if transaction.Item == "Freight Charges (Freight Charge)" ||
 				transaction.Item == "Bill of Lading Charge (Bill of Lading)" ||
