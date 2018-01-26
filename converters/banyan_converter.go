@@ -1,6 +1,10 @@
 package converters
 
 import (
+	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/berryhill/ca-xlsx-conv/models"
 
 	"github.com/tealeg/xlsx"
@@ -141,6 +145,12 @@ func (b *Banyan) Parse(transactions []*models.QuickbooksTransaction) error {
 	for i := 0; i < len(transactions); i++ {
 		row_n := sheet.AddRow()
 
+		package_type, quantity, err := parseQuantityAndPackage(
+			transactions[i].Item, transactions[i].Qty, transactions[i].UM)
+		if err != nil {
+			fmt.Println("FUCKED")
+		}
+
 		cell := row_n.AddCell()													// Load #
 		cell.Value = transactions[i].Num
 		cell = row_n.AddCell()													// Shipper Name
@@ -154,7 +164,15 @@ func (b *Banyan) Parse(transactions []*models.QuickbooksTransaction) error {
 			cell.Value = "Custom Ag"
 		}
 		cell = row_n.AddCell()													// Shipper Location Name
-		cell.Value = ""
+		if transactions[i].Class == "Integrated" {
+			cell.Value = "Integrated Engineers"
+		} else if transactions[i].Customer == "Full Cycle Nutrients" {
+			cell.Value = "Full Cycle Nutrients"
+		} else if transactions[i].Customer == "KG Chemical" {
+			cell.Value = "KG Chemical"
+		} else {
+			cell.Value = "Custom Ag"
+		}
 		cell = row_n.AddCell()													// Shipper Phone #
 		cell.Value = ""
 		cell = row_n.AddCell()													// Shipper Phone ext
@@ -182,7 +200,7 @@ func (b *Banyan) Parse(transactions []*models.QuickbooksTransaction) error {
 		cell = row_n.AddCell()													// Consignee Name
 		cell.Value = transactions[i].ShipToAddress1
 		cell = row_n.AddCell()													// Consignee Location Name
-		cell.Value = ""
+		cell.Value = transactions[i].ShipToAddress1
 		cell = row_n.AddCell()													// Consignee Phone #
 		cell.Value = ""
 		cell = row_n.AddCell()													// Consignee Phone Ext
@@ -223,18 +241,24 @@ func (b *Banyan) Parse(transactions []*models.QuickbooksTransaction) error {
 		cell.Value = ""
 		cell = row_n.AddCell()													// Transit Time (days)
 		cell.Value = ""
+		// cell = row_n.AddCell()													// Qty
+		// cell.Value = transactions[i].Qty
 		cell = row_n.AddCell()													// Qty
-		cell.Value = transactions[i].Qty
+		cell.Value = quantity
 		cell = row_n.AddCell()													// Weight
 		cell.Value = ""
 		cell = row_n.AddCell()													// Class
 		cell.Value = ""
+		// cell = row_n.AddCell()													// Package Type
+		// cell.Value = transactions[i].UM
 		cell = row_n.AddCell()													// Package Type
-		cell.Value = transactions[i].UM
+		cell.Value = package_type
 		cell = row_n.AddCell()													// Shipping Mode
 		cell.Value = ""
 		cell = row_n.AddCell()													// Shipping Qty
 		cell.Value = ""
+		// cell = row_n.AddCell()													// Shipping Package Type
+		// cell.Value = ""
 		cell = row_n.AddCell()													// Shipping Package Type
 		cell.Value = ""
 		cell = row_n.AddCell()													// Additional Weight
@@ -315,12 +339,14 @@ func (b *Banyan) Parse(transactions []*models.QuickbooksTransaction) error {
 		cell.Value = ""
 		cell = row_n.AddCell()													// NMFC
 		cell.Value = ""
+		// cell = row_n.AddCell()													// SKU
+		// cell.Value = transactions[i].Item
 		cell = row_n.AddCell()													// SKU
-		cell.Value = transactions[i].Item
+		cell.Value = transactions[i].Qty
 		cell = row_n.AddCell()													// Hazmat Y/N
 		cell.Value = ""
 		cell = row_n.AddCell()													// Description
-		cell.Value = ""
+		cell.Value = transactions[i].Item
 		cell = row_n.AddCell()													// Length
 		cell.Value = ""
 		cell = row_n.AddCell()													// Width
@@ -343,4 +369,107 @@ func (b *Banyan) Parse(transactions []*models.QuickbooksTransaction) error {
 	}
 
 	return nil
+}
+
+func parseQuantityAndPackage(
+	item string, quantity string, um string) (
+		package_type string, qty string, err error) {
+
+	item_array := strings.Split(item, " ")
+
+	if um == "ea" {
+		for _, v := range(item_array) {
+			if v == "1qt" {
+				quantity_int, _ :=
+					strconv.ParseInt(quantity, 10, 32)
+				q :=  quantity_int / 12
+				qty = strconv.Itoa(int(q))
+				package_type = "cases"
+			} else if v == "1pt" {
+				quantity_int, _ := strconv.ParseFloat(quantity, 32)
+				q :=  quantity_int / 20
+
+				quantity_float, _ := strconv.ParseFloat(quantity, 64)
+				if quantity_float % 20.0 != 0 {
+					q++
+				}
+
+				qty = strconv.Itoa(int(q))
+				package_type = "cases"
+			}
+		}
+	} else if um == "gal" {
+		for _, v := range(item_array) {
+			if v == "1" {
+				quantity_int, _ :=
+					strconv.ParseInt(quantity, 10, 32)
+				q :=  quantity_int / 4
+				qty = strconv.Itoa(int(q))
+				package_type = "cases"
+			} else if v == "2.5" {
+				quantity_int, _ :=
+					strconv.ParseInt(quantity, 10, 32)
+				q :=  quantity_int / 5
+				qty = strconv.Itoa(int(q))
+				package_type = "cases"
+			} else if v == "5" {
+				quantity_int, _ :=
+					strconv.ParseInt(quantity, 10, 32)
+				q :=  quantity_int / 5
+				qty = strconv.Itoa(int(q))
+				package_type = "pail"
+			} else if v == "30" {
+				quantity_int, _ :=
+					strconv.ParseInt(quantity, 10, 32)
+				q :=  quantity_int / 30
+				qty = strconv.Itoa(int(q))
+				package_type = "drums"
+			} else if v == "55" {
+				quantity_int, _ :=
+					strconv.ParseInt(quantity, 10, 32)
+				q :=  quantity_int / 55
+				qty = strconv.Itoa(int(q))
+				package_type = "drums"
+			// } else if v == "265" { // todo: deprecate this..
+			// 	q, _ := strconv.ParseInt(quantity, 10, 32)
+			// 	qty = strconv.FormatInt(q / 270, 16)
+			// 	package_type = "tote"
+			} else if v == "270" {
+				quantity_int, _ :=
+					strconv.ParseInt(quantity, 10, 32)
+				q :=  quantity_int / 270
+				qty = strconv.Itoa(int(q))
+				package_type = "tote"
+			}
+		}
+	} else if um == "lb" {
+		for _, v := range(item_array) {
+			if v == "25" {
+				quantity_int, _ :=
+					strconv.ParseInt(quantity, 10, 32)
+				q :=  quantity_int / 25
+				qty = strconv.Itoa(int(q))
+				package_type = "bag"
+			} else if v == "50" {
+				quantity_int, _ :=
+					strconv.ParseInt(quantity, 10, 32)
+				q :=  quantity_int / 50
+				qty = strconv.Itoa(int(q))
+				package_type = "bag"
+			} else if v == "2000" {
+				quantity_int, _ :=
+					strconv.ParseInt(quantity, 10, 32)
+				q :=  quantity_int / 2000
+				qty = strconv.Itoa(int(q))
+				package_type = "bag"
+			}
+		}
+	} else if um == "ton" {
+
+	} else {
+		qty = "-1"
+	}
+	//fmt.Println(qty, package_type)
+
+	return package_type, qty, err
 }

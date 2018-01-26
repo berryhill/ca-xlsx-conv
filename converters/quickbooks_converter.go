@@ -1,6 +1,7 @@
 package converters
 
 import (
+	//"fmt"
 	"strconv"
 	"strings"
 
@@ -106,6 +107,10 @@ func (qbs *QuickbooksSheet) Parse() error {
 			} else {
 				transactions = append(transactions, transaction)
 			}
+
+			//fmt.Print(transaction.Item + " - ")
+			//fmt.Println(transaction.Qty)
+			//fmt.Println()
 
 			index++
 		}
